@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+ <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Vishnu D Sasidharan</title>
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+  <main>
+      <header>
+      <h1>vishds</h1>
+      <p>
+      My name is Vishnu D Sasidharan.
+      I've been working in transportation industry as a software engineer (see <a href="./resume.html">resume</a>) since 2023.
+      I work mostly on backend web applications, mostly in Go and Python.
+      </p>
+      <p>
+      I post things I find interesting on this website, mostly for my own reference.
+      </p>
+      </header>
+
+      <section>
+      <hr>
+      <br>
+      <h2>Odin's defer differs from Go's defer</h2>
+      <p>
+        As per the <a href="https://go.dev/blog/defer-panic-and-recover">Go Blog</a>:
+      </p>
+      <blockquote>
+        A defer statement pushes a function call onto a list.
+        The list of saved calls is executed after the surrounding function returns.
+      </blockquote>
+      <p>
+        Odin's <code>defer</code> implementation is what we (atleast I) expect to happen.
+        <a href="https://odin-lang.org/docs/overview/">Odin's Overview</a> states:
+      </p>
+      <blockquote>
+        A defer statement defers the execution of a statement until the end of the scope it is in.
+      </blockquote>
+      <p>
+        While looking it up to add the hyperlink here, I realised that it directly says:
+      </p>
+      <blockquote>
+        The defer construct in Odin differs from Go’s defer, which is function-exit and relies on a closure stack system.
+      </blockquote>
+
+      <br>
+      <h2>Media Transfer Protocol</h2>
+      <p>
+        Devices such as android phones connect with linux via MTP.
+        <code>lsusb</code> will recognise these devices, but <code>lsblk</code> will not recognise them as blocks (storage device).
+        Additional packages like <code>mtptools</code> are required to transfer data to such devices.
+      </p>
+
+      <br>
+      <h2>SQLAlchemy's AsyncSession.add is sync but .delete is async</h2>
+      <p>
+        This is because delete operation may need to cascade along unloaded relationships,
+        It is awaitable to allow for those queries to take place first.
+      </p>
+      
+      <br>
+      <h2>TCP is much more complicated than I assumed</h2>
+      <p>
+        <a href="https://blog.netherlabs.nl/articles/2009/01/18/the-ultimate-so_linger-page-or-why-is-my-tcp-not-reliable">The ultimate SO_LINGER page, or: why is my tcp not reliable</a>
+      </p>
+
+      <br>
+      <h2>Go has a built-in println</h2>
+      <p>
+        Go has a println method built into the runtime, mostly implemented by the language developers for themselves.
+        It is not guaranteed to stay in the language.
+      </p>
+      <p>
+        But it does make the helloworld shorter:
+      </p>
+      <pre><code>
+<span class="kw">package</span> main
+
+<span class="kw">func</span> main() {
+    <span class="method">println</span>(<span class="str">"heloi"</span>)
+}
+      </code></pre>
+      <p>
+        source: <a href="https://pkg.go.dev/builtin#println">builtin package docs</a>
+      </p>
+
+      </section>
+  </main>
+  <br>
+  <hr>
+  <footer>
+      Last Updated: 2025-12-17
+  </footer>
+  </body>
+</html>
