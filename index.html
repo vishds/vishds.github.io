@@ -23,6 +23,32 @@
       <hr>
 
       <br>
+      <h2>Go unsafe string trick</h2>
+      <p>
+      I have a TCP server where I read AIS140 packets in ASCII format.
+      There are floating point fields which have like Speed, Latitude, etc which I need to parse.
+      strconv.ParseFloat requires a string and not a byte slice.
+      Converting a byte slice to string will cause an allocation since the string type is immutable.
+      </p>
+
+      <p>
+      Each instance of this service handles thousands of packets per second.
+      So it would be nice to avoid an allocation in the hotloop.
+      I found the following trick to convert a byte slice to string without allocation using the unsafe package.
+      </p>
+      <pre><code>tmp := unsafe.String(unsafe.SliceData(b), len(b))</pre></code>
+      <p>
+      I'll be only using this in production code after I benchmark and ensure it makes a difference.
+      Also, the only risk I'm aware of is that the byte slice should not be modified during the lifetime of the string.
+      This is ensured by design. So I hope I'm not introducing a bug here.
+      </p>
+
+      <p>
+      After a few days I figured out that the <a href="https://github.com/valyala/fasthttp">fasthttp</a> package uses the exact same trick.
+      I will be using that package as a reference for more related ideas.
+      </p>
+
+      <br>
       <h2>Implementing my own CORS middleware</h2>
       <p>
       While implementing a REST API server at work, I had to implement my own CORS middleware.
@@ -106,6 +132,7 @@ func CORS(next http.HandlerFunc) http.HandlerFunc {
 }
       </code></pre>
 
+      <br>
       <h2>Odin's defer differs from Go's defer</h2>
       <p>
         As per the <a href="https://go.dev/blog/defer-panic-and-recover">Go Blog</a>:
