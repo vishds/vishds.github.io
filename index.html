@@ -95,7 +95,7 @@ func CORS(next http.HandlerFunc) http.HandlerFunc {
         w.Header().Add(
             "Access-Control-Allow-Headers",
             "Content-Type, Content-Length, Accept-Encoding, Authorization, accept, origin, Cache-Control, X-Requested-With",
-		)
+        )
         w.Header().Add("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
         if r.Method == "OPTIONS" {
             w.WriteHeader(http.StatusOK)
