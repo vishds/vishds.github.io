@@ -21,7 +21,91 @@
 
       <section>
       <hr>
+
       <br>
+      <h2>Implementing my own CORS middleware</h2>
+      <p>
+      While implementing a REST API server at work, I had to implement my own CORS middleware.
+      It was the first time I implemented one.
+      My first iteration was as follows:
+      </p>
+      <pre><code>
+func CORS(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Add("Access-Control-Allow-Credentials", "true")
+        w.Header().Add(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Content-Length, Accept-Encoding, Authorization, accept, origin, Cache-Control, X-Requested-With",
+        )
+        w.Header().Add("Access-Control-Allow-Methods", "POST, GET, PUT")
+        next(w, r)
+    }
+}
+      </code></pre>
+      <p>
+      I took a reference from a code example on the internet and copied only what made sense to me.
+      I ran into my first issue, I did not allow OPTIONS method.
+      Before the browser does a POST, it will do a preflight check with OPTIONS method to see whether the request is safe to send.
+      This was being blocked. So I added OPTIONS to the allowed methods:
+      </p>
+      <p>
+      Looking up the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#preflighted_requests">MDN docs on CORS</a> , I realised that the server also need to respond to these checks with 204 No Content. Hence I added:
+      </p>
+      <pre><code>
+if r.Method == "OPTIONS" {
+    w.WriteHeader(http.StatusNoContent)
+    return
+}
+      </code></pre>
+      <p>
+      The docs also issued a warning in the context of Private APIs:
+      </p>
+      <blockquote>
+          <strong>Warning:</strong>
+          Using the wildcard to allow all sites to access a private API is a bad idea.
+      </blockquote>
+      <blockquote>
+      To allow any site to make CORS requests without using the * wildcard (for example, to enable credentials), your server must read the value of the request's Origin header and use that value to set Access-Control-Allow-Origin, and must also set a Vary: Origin header to indicate that some headers are being set dynamically depending on the origin.
+      </blockquote>
+      <p>
+      So basically, I need to read the Origin header and set it to Access-Control-Allow-Origin.
+      I also have to set the Vary header to indicate to the browser that it changes based on Origin and manage cache accordingly.
+      </p>
+      <pre><code>
+origin := r.Header.Get("Origin")
+if origin != "" {
+    w.Header().Set("Access-Control-Allow-Origin", origin)
+    w.Header().Set("Vary", "Origin")
+} else {
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+}
+	  </code></pre>
+      <p>The final iteration:</p>
+      <pre><code>
+func CORS(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        origin := r.Header.Get("Origin")
+        if origin != "" {
+            w.Header().Set("Access-Control-Allow-Origin", origin)
+            w.Header().Set("Vary", "Origin")
+        } else {
+            w.Header().Set("Access-Control-Allow-Origin", "*")
+        }
+        w.Header().Add("Access-Control-Allow-Credentials", "true")
+        w.Header().Add(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Content-Length, Accept-Encoding, Authorization, accept, origin, Cache-Control, X-Requested-With",
+		)
+        w.Header().Add("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+        if r.Method == "OPTIONS" {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+        next(w, r)
+    }
+}
+      </code></pre>
+
       <h2>Odin's defer differs from Go's defer</h2>
       <p>
         As per the <a href="https://go.dev/blog/defer-panic-and-recover">Go Blog</a>:
