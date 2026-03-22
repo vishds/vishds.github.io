@@ -12,6 +12,10 @@ h1 {
     line-height: 1
 }
 
+hr {
+    margin: 1.5em 0
+}
+
 ul {
     text-align: center
 }
